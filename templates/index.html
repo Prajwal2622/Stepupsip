@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIP Step-Up Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #555;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SIP Step-Up Calculator</h1>
+
+        <!-- Input Form -->
+        <form method="POST" action="/calculate">
+            <div class="form-group">
+                <label for="initial_investment">Initial Investment (₹):</label>
+                <input type="number" id="initial_investment" name="initial_investment" class="form-control" step="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="step_up_percentage">Step-Up Percentage (%):</label>
+                <input type="number" id="step_up_percentage" name="step_up_percentage" class="form-control" step="0.1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="rate_of_return">Annual Rate of Return (%):</label>
+                <input type="number" id="rate_of_return" name="rate_of_return" class="form-control" step="0.1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="months">Duration (Months):</label>
+                <input type="number" id="months" name="months" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="step_up_frequency">Step-Up Frequency:</label>
+                <select id="step_up_frequency" name="step_up_frequency" class="form-control">
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="half-yearly">Half-Yearly</option>
+                    <option value="annually">Annually</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Calculate</button>
+        </form>
+
+        <!-- Display Results if available -->
+        {% if total_investment %}
+            <h2 class="mt-4">Resulted Returns:</h2>
+            <p><strong>Total Investment:</strong> ₹{{ total_investment }}</p>
+            <p><strong>Total Returns:</strong> ₹{{ total_returns }}</p>
+            <p><strong>Final Value (Investment + Returns):</strong> ₹{{ total_value }}</p>
+
+            <!-- Download CSV Button with Hidden Field -->
+            <form method="POST" action="/download_csv" id="downloadForm">
+                <input type="hidden" name="csv_data" value="{{ csv_data }}">
+                <button type="button" class="btn btn-success" id="downloadButton">Download CSV</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Modal for Email Signup -->
+    <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emailModalLabel">Sign Up</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="signupForm">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submitEmail">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#downloadButton').click(function () {
+                $('#emailModal').modal('show');
+            });
+
+            $('#submitEmail').click(function () {
+                var email = $('#email').val();
+                if (!email) {
+                    alert('Please enter your email address.');
+                    return;
+                }
+                $.post('/signup', { email: email }, function (response) {
+                    alert(response.success);
+                    $('#emailModal').modal('hide');
+                    $('#downloadForm').submit();
+                }).fail(function (xhr) {
+                    alert(xhr.responseJSON.error);
+                });
+            });
+        });
+    </script>
+
+    <!-- Footer Section -->
+    <div class="footer">
+        Made by Prajwal
+    </div>
+</body>
+</html>
